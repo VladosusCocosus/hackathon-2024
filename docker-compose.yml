@@ -1,0 +1,27 @@
+version: "3.6"
+
+services:
+  postgres:
+    image: postgres:14.2
+    restart: always
+    tty: true
+    ports:
+      - "127.0.0.1:5433:5432"
+    environment:
+      command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+      POSTGRES_DB: 'workflow'
+      POSTGRES_USER: 'mainuser'
+      POSTGRES_PASSWORD: 'fnqNtQ7doATNpZz8C6VcrJ3JE3'
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d workflow -U root" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data:rw
+    networks:
+      - internal
+
+
+networks:
+  internal:

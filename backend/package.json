@@ -1,0 +1,21 @@
+{
+  "name": "workflow-watcher-backend",
+  "repository": "https://github.com/VladosusCocosus/hackathon-2024",
+  "author": "Vladislav Razin <razin36986@gmail.com>",
+  "description": "backend for workflow watcher",
+  "scripts": {
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.11.2",
+    "dotenv": "^16.4.5",
+    "hono": "^4.4.5",
+    "pg": "^8.12.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "@types/pg": "^8.11.6",
+    "tsx": "^4.7.1"
+  }
+}
