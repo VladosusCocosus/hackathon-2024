@@ -115,6 +115,29 @@ CREATE TABLE public.schema_migrations (
 
 
 --
+-- Name: sessions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sessions (
+    id text NOT NULL,
+    expires_at timestamp with time zone NOT NULL,
+    user_id uuid NOT NULL
+);
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.users (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name character varying(128) NOT NULL,
+    password text NOT NULL,
+    email character varying(128) NOT NULL
+);
+
+
+--
 -- Name: device_platforms id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -160,6 +183,22 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
+-- Name: sessions sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT sessions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: device_platforms_device_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -190,6 +229,14 @@ ALTER TABLE ONLY public.device_platforms
 
 
 --
+-- Name: sessions sessions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
@@ -199,4 +246,5 @@ ALTER TABLE ONLY public.device_platforms
 --
 
 INSERT INTO public.schema_migrations (version) VALUES
-    ('20240613152344');
+    ('20240613152344'),
+    ('20240616130653');
