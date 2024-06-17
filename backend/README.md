@@ -1,8 +1,12 @@
-```
-npm install
-npm run dev
-```
+### Запуск
+```docker compose up -d```
+
+
+```npm i```
 
 ```
-open http://localhost:3000
+DATABASE_URL="postgres://user:password@127.0.0.1:5433/workflow?sslmode=disable" dbmate up 
 ```
+
+```npm run dev```
+
