@@ -6,6 +6,7 @@ import {crypto} from "../../lib/crypto";
 import {deleteCookie, getCookie, setCookie} from "hono/cookie";
 import {lucia} from "../../lib/lucia";
 import {UserController} from "./controller";
+import {getUser} from "../../lib/user";
 
 const userController = new UserController()
 
@@ -74,10 +75,22 @@ const app = new Hono()
         return c.json(user, 200)
     })
 
-
     .post('/logout', async (c) => {
         deleteCookie(c, 'auth_session')
         return c.json({success: true})
+    })
+
+    .post('/device/:id', async (c) => {
+        const { id } = c.req.param()
+
+        const user = await getUser(c)
+
+        if (!user) {
+            return c.json({message: "Not authenticated"}, 404)
+        }
+
+        const newLink = await userController.linkDevice(id, user?.id)
+        return c.json(newLink)
     })
 
 export default app

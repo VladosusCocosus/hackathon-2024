@@ -126,6 +126,16 @@ CREATE TABLE public.sessions (
 
 
 --
+-- Name: user_devices; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.user_devices (
+    user_id uuid NOT NULL,
+    device_id uuid NOT NULL
+);
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -213,6 +223,27 @@ CREATE UNIQUE INDEX device_platforms_device_id_platform_id_idx ON public.device_
 
 
 --
+-- Name: user_devices_device_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX user_devices_device_id_idx ON public.user_devices USING btree (device_id);
+
+
+--
+-- Name: user_devices_user_id_device_id_unique_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX user_devices_user_id_device_id_unique_idx ON public.user_devices USING btree (user_id, device_id);
+
+
+--
+-- Name: user_devices_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX user_devices_user_id_idx ON public.user_devices USING btree (user_id);
+
+
+--
 -- Name: device_platforms device_platforms_device_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -237,6 +268,22 @@ ALTER TABLE ONLY public.sessions
 
 
 --
+-- Name: user_devices user_devices_device_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_devices
+    ADD CONSTRAINT user_devices_device_id_fkey FOREIGN KEY (device_id) REFERENCES public.users(id);
+
+
+--
+-- Name: user_devices user_devices_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user_devices
+    ADD CONSTRAINT user_devices_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
@@ -247,4 +294,5 @@ ALTER TABLE ONLY public.sessions
 
 INSERT INTO public.schema_migrations (version) VALUES
     ('20240613152344'),
-    ('20240616130653');
+    ('20240616130653'),
+    ('20240617065815');
