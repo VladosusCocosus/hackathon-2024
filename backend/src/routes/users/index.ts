@@ -6,12 +6,10 @@ import {crypto} from "../../lib/crypto";
 import {deleteCookie, getCookie, setCookie} from "hono/cookie";
 import {lucia} from "../../lib/lucia";
 import {UserController} from "./controller";
-import {getUser} from "../../lib/user";
 
 const userController = new UserController()
 
 const app = new Hono()
-
 
     .post('/', zValidator('json', registrationUserInput, (result, c) => {
         if (!result.success) {
@@ -83,7 +81,7 @@ const app = new Hono()
     .post('/device/:id', async (c) => {
         const { id } = c.req.param()
 
-        const user = await getUser(c)
+        const user = c.get('user')
 
         if (!user) {
             return c.json({message: "Not authenticated"}, 404)
