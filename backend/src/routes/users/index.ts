@@ -1,14 +1,17 @@
 import {Hono} from "hono";
 import {db} from "../../lib/db";
 import {zValidator} from "@hono/zod-validator";
-import {loginUserInput, registrationUserInput, User} from "./schemas";
+import {loginUserInput, registrationUserInput, User} from "../../types/user";
 import {crypto} from "../../lib/crypto";
 import {deleteCookie, getCookie, setCookie} from "hono/cookie";
 import {lucia} from "../../lib/lucia";
+import {UserController} from "./controller";
+
+const userController = new UserController()
 
 const app = new Hono()
 
-    
+
     .post('/', zValidator('json', registrationUserInput, (result, c) => {
         if (!result.success) {
             return c.text('User is invalid', 400)
@@ -16,10 +19,9 @@ const app = new Hono()
     }), async (c) => {
         const body = c.req.valid('json')
 
-        const passwordHash = await crypto.generateHash(body.password)
+        const user = await userController.createUser(body)
 
-        const data = await db.query("insert into users (name, password, email) values ($1, $2, $3) returning name, email, id", [body.name, passwordHash, body.email])
-        return c.json(data.rows[0])
+        return c.json(user, 200)
     })
 
 
