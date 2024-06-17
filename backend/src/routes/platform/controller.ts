@@ -2,7 +2,7 @@ import {db} from "../../lib/db";
 import {Device} from "../../types/device";
 import {Platform} from "../../types/platforms";
 
-export class DeviceController {
+export class PlatformController {
     async getPlatforms (limit: number = 10, offset: number = 0): Promise<Platform[]> {
         const {rows} = await db.query<Platform>(`
             select *

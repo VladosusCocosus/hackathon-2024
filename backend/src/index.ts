@@ -4,10 +4,12 @@ import 'dotenv/config'
 
 import userRouter from './routes/users'
 import deviceRouter from './routes/device'
+import platformRouter from './routes/platform'
 
 const app = new Hono()
     .route('/users', userRouter)
     .route('/devices', deviceRouter)
+    .route('/platforms', platformRouter)
 
 const port = 3000
 console.log(`Server is running on port ${port}`)

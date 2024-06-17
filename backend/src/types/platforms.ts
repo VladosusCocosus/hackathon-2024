@@ -1,6 +1,6 @@
 import {z} from "zod";
 
-const platformSchema = z.object({
+export const platformSchema = z.object({
     id: z.string(),
     name: z.string()
 })
