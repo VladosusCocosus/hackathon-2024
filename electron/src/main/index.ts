@@ -1,25 +1,14 @@
-import {app, BrowserWindow, ipcMain, shell} from 'electron'
+import {app, BrowserWindow, ipcMain, shell, session} from 'electron'
 import {join} from 'path'
 import {electronApp, is, optimizer} from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import Store from 'electron-store';
 import {Device} from "../utils/device";
-import {Commands} from "../utils/device/types";
 import {IPCMethods} from "../types/ipc-methods";
-import {platformsAdapters} from "../utils/platforms/platform";
-import {Platform, PlatformNames} from "../types/platforms";
-import {Pipeline, PlatformAdapter} from "../utils/platforms/common";
 
 
 const store = new Store() as unknown as { get: (key: string) => unknown, set: (key: string, value: unknown) => unknown };
-let broadcast: boolean = false
 let deviceName: string | null = null
-let pipelines: Pipeline[] = []
-let pipelineIndex = 0;
-
-const providersInstances: Record<Partial<PlatformNames>, PlatformAdapter | undefined> = {
-  [PlatformNames.circleCI]: undefined,
-}
 
 const device = new Device((command, value) => {
   if (command === 'name') {
@@ -52,6 +41,7 @@ function createWindow(): void {
     mainWindow.show()
   })
 
+
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
@@ -73,68 +63,36 @@ function createWindow(): void {
   }, 1000)
 
 
-
-  setInterval(() => {
-    if (pipelines.length) {
-      let workflow = pipelines?.[pipelineIndex]
-      if (workflow) {
-        device.send(Commands.SendDisplayInfo, `$${workflow.info.name}|${workflow.info.status}`)
-        pipelineIndex++
-      } else {
-        pipelineIndex = 0;
-        workflow = pipelines[pipelineIndex]
-        if (workflow) {
-          device.send(Commands.SendDisplayInfo, `${workflow.info.name}|${workflow.info?.status}`)
-          pipelineIndex++
-        }
-      }
-
-    }
-  }, 3000)
-
-  ipcMain.handle(IPCMethods.StartBroadcast, async () => {
-    if (!broadcast) {
-      broadcast = true;
-      setInterval(async () => {
-        const platforms = store.get('platforms') as unknown as Platform[]
-
-        const results = (await Promise.all(platforms.map((p) => {
-
-          if (!p.accessToken?.length) {
-            return null
-          }
-
-          let instance = providersInstances[p.key] ?? new platformsAdapters[p.key](p.accessToken);
-
-          providersInstances[p.key] = instance
-          try {
-            return instance.getPipeline()
-          } catch (e) {
-            return null
-          }
-        }))).filter(Boolean)
-
-        pipelines = results.reduce((acc, item) => [...(acc ?? []), ...(item ?? [])], []) ?? []
-
-        const hasError = pipelines.some(w => ["failed", 'error'].includes(w.info.status))
-
-        try {
-          mainWindow.webContents.send('pnl:update', pipelines)
-
-          device.send(Commands.SendPNL, hasError ?  'Wasted': 'Good')
-        } catch (e) {
-          console.error(e)
-          device.send(Commands.SendPNL, '3')
-        }
-      }, 5000)
-    }
-  })
-
   mainWindow.webContents.openDevTools()
 }
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.electron')
+
+  session.defaultSession.webRequest.onHeadersReceived(
+    { urls: ['http://localhost:3000/*'] },
+    (details, callback) => {
+      if (
+        details.responseHeaders &&
+        details.responseHeaders['set-cookie'] &&
+        details.responseHeaders['set-cookie'].length &&
+        !details.responseHeaders['set-cookie'][0].includes('SameSite=none')
+      ) {
+        details.responseHeaders['set-cookie'][0] = details.responseHeaders['set-cookie'][0] + '; SameSite=none; Secure';
+      }
+
+      console.log(details.responseHeaders)
+
+      callback({ cancel: false, responseHeaders: details.responseHeaders });
+    },
+  );
+
+  session.defaultSession.cookies.get({})
+    .then((cookies) => {
+      console.log(cookies)
+    }).catch((error) => {
+    console.log(error)
+  })
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)

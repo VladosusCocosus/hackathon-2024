@@ -1,9 +1,12 @@
 import {Grid, View} from "@adobe/react-spectrum";
 import {Outlet} from "react-router-dom";
 import { Header as HeaderComponent } from '../header'
+import {useMe} from "../../hooks/use-me";
 
 export function Layout() {
-  console.log("Abc")
+
+ useMe()
+
   return (
       <Grid
         areas={[
