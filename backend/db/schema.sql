@@ -81,7 +81,8 @@ CREATE TABLE public.devices (
 
 CREATE TABLE public.platforms (
     id integer NOT NULL,
-    name character varying(64)
+    name character varying(64),
+    image text
 );
 
 
@@ -295,4 +296,5 @@ ALTER TABLE ONLY public.user_devices
 INSERT INTO public.schema_migrations (version) VALUES
     ('20240613152344'),
     ('20240616130653'),
-    ('20240617065815');
+    ('20240617065815'),
+    ('20240619204714');

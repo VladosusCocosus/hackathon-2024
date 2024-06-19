@@ -6,23 +6,27 @@ import userRouter from './routes/users'
 import deviceRouter from './routes/device'
 import platformRouter from './routes/platform'
 import authRouter from './routes/auth'
-import {getUser} from "./lib/user";
 import {User} from "./types/user";
+import {cors} from "hono/cors";
+import {jwt} from "hono/jwt";
 
 type Variables = {
     user: Omit<User, 'password'>
+    jwtPayload: Record<string, unknown>
 }
 
-const app = new Hono<{ Variables: Variables }>()
-    .route('/auth', authRouter)
-    .use('/*', async (c, next) => {
-      const user = await getUser(c)
-      if (!user) {
-        return c.json("Unauthorized", 401)
-      }
 
-      c.set('user', user)
-      await next()
+const app = new Hono<{ Variables: Variables }>()
+    .use('*', cors({
+        origin: '*',
+        credentials: true
+    }))
+    .route('/auth', authRouter)
+    .use('*',  (c, next) => {
+        const jwtMiddleware = jwt({
+            secret: process.env?.SECRET ?? '',
+        })
+        return jwtMiddleware(c, next)
     })
     .route('/users', userRouter)
     .route('/devices', deviceRouter)

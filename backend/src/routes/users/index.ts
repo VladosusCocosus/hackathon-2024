@@ -1,28 +1,17 @@
 import {Hono} from "hono";
-import {deleteCookie, getCookie} from "hono/cookie";
-import {lucia} from "../../lib/lucia";
 import {UserController} from "./controller";
 
 const userController = new UserController()
 
 const app = new Hono()
     .get('/me', async (c) => {
-        const cookie = getCookie(c)
+        const payload = c.get('jwtPayload')
 
-        const authSession = cookie["auth_session"]
-
-        const {user} = await lucia.validateSession(authSession)
-
-        if (!user) {
+        if (!payload) {
             return c.json({message: "Not found"}, 404)
         }
 
-        return c.json(user, 200)
-    })
-
-    .post('/logout', async (c) => {
-        deleteCookie(c, 'auth_session')
-        return c.json({success: true})
+        return c.json(payload, 200)
     })
 
     .post('/device/:id', async (c) => {

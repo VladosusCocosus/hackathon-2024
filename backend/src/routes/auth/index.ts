@@ -3,13 +3,12 @@ import {zValidator} from "@hono/zod-validator";
 import {loginUserInput, registrationUserInput} from "../../types/user";
 import {AuthController} from "./controller";
 import {crypto} from "../../lib/crypto";
-import {lucia} from "../../lib/lucia";
-import {setCookie} from "hono/cookie";
+import { decode, sign, verify } from 'hono/jwt'
 
 const authController = new AuthController()
 
 export default new Hono()
-    .post('/', zValidator('json', registrationUserInput, (result, c) => {
+    .post('/registration', zValidator('json', registrationUserInput, (result, c) => {
         if (!result.success) {
             return c.text('User is invalid', 400)
         }
@@ -42,15 +41,11 @@ export default new Hono()
             return c.text('Password is not correct', 401)
         }
 
-        const session = await lucia.createSession(user.id, {})
+        const accessToken = await sign({ ...restUser, exp:  Math.floor(Date.now() / 1000) + 60 * 5 }, process.env.SECRET ?? '')
+        const refreshToken = await sign({ id: restUser.id, refresh: true, maxAge: '7d' }, process.env.SECRET ?? '')
 
-        const cookieSession = lucia.createSessionCookie(session.id)
-
-        setCookie(c, cookieSession.name, cookieSession.value, {
-            secure: cookieSession.attributes.secure,
-            httpOnly: cookieSession.attributes.httpOnly,
-            path: cookieSession.attributes.path
+        return c.json({
+            accessToken,
+            refreshToken
         })
-
-        return c.json(restUser)
     })
