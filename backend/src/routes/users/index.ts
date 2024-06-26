@@ -5,13 +5,15 @@ const userController = new UserController()
 
 const app = new Hono()
     .get('/me', async (c) => {
-        const payload = c.get('jwtPayload')
+        const {id} = c.get('jwtPayload')
 
-        if (!payload) {
-            return c.json({message: "Not found"}, 404)
+        const user = await userController.getUser(id)
+
+        if (!user) {
+            return c.json({message: "Not found"}, 401)
         }
 
-        return c.json(payload, 200)
+        return c.json(user, 200)
     })
 
     .post('/device/:id', async (c) => {

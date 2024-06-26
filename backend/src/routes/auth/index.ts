@@ -4,8 +4,11 @@ import {loginUserInput, registrationUserInput} from "../../types/user";
 import {AuthController} from "./controller";
 import {crypto} from "../../lib/crypto";
 import { decode, sign, verify } from 'hono/jwt'
+import {z} from "zod";
+import {UserController} from "../users/controller";
 
 const authController = new AuthController()
+const userController = new UserController()
 
 export default new Hono()
     .post('/registration', zValidator('json', registrationUserInput, (result, c) => {
@@ -47,5 +50,35 @@ export default new Hono()
         return c.json({
             accessToken,
             refreshToken
+        })
+    })
+
+
+    .post('/refresh', zValidator('json', z.object({
+        refresh: z.string()
+    }), (result, c) => {
+        if (!result.success) {
+            return c.text('Login info is invalid', 400)
+        }
+    }), async (c) => {
+        const body = c.req.valid('json')
+        const { id } = await verify(body.refresh, process.env.SECRET ?? '')
+
+        if (typeof id !== 'string') {
+            return c.text('User not found', 404)
+        }
+
+        const user =  userController.getUser(id)
+
+        if (!user) {
+            return c.text('User not found', 404)
+        }
+
+        const {  ...restUser } = user
+
+        const accessToken = await sign({ ...restUser, exp:  Math.floor(Date.now() / 1000) + 60 * 5 }, process.env.SECRET ?? '')
+
+        return c.json({
+            accessToken
         })
     })

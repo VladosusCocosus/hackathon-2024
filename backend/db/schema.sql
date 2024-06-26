@@ -71,7 +71,7 @@ ALTER SEQUENCE public.device_platforms_platform_id_seq OWNED BY public.device_pl
 CREATE TABLE public.devices (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     device_name character varying(64),
-    owner character varying(64)
+    owner uuid
 );
 
 
@@ -112,27 +112,6 @@ ALTER SEQUENCE public.platforms_id_seq OWNED BY public.platforms.id;
 
 CREATE TABLE public.schema_migrations (
     version character varying(128) NOT NULL
-);
-
-
---
--- Name: sessions; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.sessions (
-    id text NOT NULL,
-    expires_at timestamp with time zone NOT NULL,
-    user_id uuid NOT NULL
-);
-
-
---
--- Name: user_devices; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.user_devices (
-    user_id uuid NOT NULL,
-    device_id uuid NOT NULL
 );
 
 
@@ -194,14 +173,6 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
--- Name: sessions sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.sessions
-    ADD CONSTRAINT sessions_pkey PRIMARY KEY (id);
-
-
---
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -224,24 +195,10 @@ CREATE UNIQUE INDEX device_platforms_device_id_platform_id_idx ON public.device_
 
 
 --
--- Name: user_devices_device_id_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: devices_owner_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX user_devices_device_id_idx ON public.user_devices USING btree (device_id);
-
-
---
--- Name: user_devices_user_id_device_id_unique_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX user_devices_user_id_device_id_unique_idx ON public.user_devices USING btree (user_id, device_id);
-
-
---
--- Name: user_devices_user_id_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX user_devices_user_id_idx ON public.user_devices USING btree (user_id);
+CREATE INDEX devices_owner_idx ON public.devices USING btree (owner);
 
 
 --
@@ -261,27 +218,11 @@ ALTER TABLE ONLY public.device_platforms
 
 
 --
--- Name: sessions sessions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: devices devices_owner_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.sessions
-    ADD CONSTRAINT sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
-
-
---
--- Name: user_devices user_devices_device_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.user_devices
-    ADD CONSTRAINT user_devices_device_id_fkey FOREIGN KEY (device_id) REFERENCES public.users(id);
-
-
---
--- Name: user_devices user_devices_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.user_devices
-    ADD CONSTRAINT user_devices_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+ALTER TABLE ONLY public.devices
+    ADD CONSTRAINT devices_owner_fkey FOREIGN KEY (owner) REFERENCES public.users(id);
 
 
 --
@@ -295,6 +236,4 @@ ALTER TABLE ONLY public.user_devices
 
 INSERT INTO public.schema_migrations (version) VALUES
     ('20240613152344'),
-    ('20240616130653'),
-    ('20240617065815'),
     ('20240619204714');

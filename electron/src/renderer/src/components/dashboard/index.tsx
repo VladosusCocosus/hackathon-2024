@@ -5,6 +5,7 @@ import {Platform} from "../../../../types/platforms";
 import {useEffect, useState} from "react";
 import {Positions} from "./components/positions";
 import {Pipeline} from "../../../../utils/platforms/common";
+import {Devices} from "./components/devices";
 
 export function Dashboard () {
   const [settings ] = useStore<Platform[]>('platforms')
@@ -41,6 +42,7 @@ export function Dashboard () {
           </View>
         )}
         <ChoosePlatform/>
+        <Devices/>
 
       </Flex>
     </View>

@@ -1,9 +1,18 @@
 -- migrate:up
+CREATE TABLE users (
+   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+   name varchar(128) NOT NULL,
+   password TEXT NOT NULL,
+   email varchar(128) NOT NULL
+);
+
 create table if not exists devices (
     id uuid primary key default gen_random_uuid(),
     device_name varchar(64),
-    owner varchar(64)
-);
+    owner uuid references users(id)
+ );
+
+create index on devices (owner);
 
 create table if not exists platforms (
     id serial primary key,
@@ -27,4 +36,5 @@ drop index device_platforms_device_id_platform_id_idx;
 drop table device_platforms;
 drop table platforms;
 drop table devices;
+DROP TABLE users;
 

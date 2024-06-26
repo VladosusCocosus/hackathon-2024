@@ -12,7 +12,7 @@ import {jwt} from "hono/jwt";
 
 type Variables = {
     user: Omit<User, 'password'>
-    jwtPayload: Record<string, unknown>
+    jwtPayload: Omit<User, 'password'>
 }
 
 

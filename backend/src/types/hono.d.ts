@@ -4,6 +4,6 @@ declare module 'hono' {
 
     interface ContextVariableMap {
         user: Omit<User, 'password'>
-        jwtPayload: Record<string, unknown>
+        jwtPayload: Omit<User, 'password'>
     }
 }

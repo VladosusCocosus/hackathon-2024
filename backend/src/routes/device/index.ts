@@ -10,10 +10,21 @@ export default new Hono()
     .post(
     '/',
         zValidator('json',
-        deviceSchema.omit({'id': true})),
+        deviceSchema.omit({id: true, owner: true})),
 async (c) => {
+            const {id: userId} = c.get('jwtPayload')
             const body = c.req.valid('json')
-            const result = await deviceController.createDevice({device: body})
+            const result = await deviceController.createDevice({device: {...body, owner: userId}})
+            return c.json(result, 200)
+        }
+    )
+
+    .get(
+        '/user',
+        async (c) => {
+            const {id: userId} = c.get('jwtPayload')
+            console.log(userId)
+            const result = await deviceController.getUserDevices(userId)
             return c.json(result, 200)
         }
     )
@@ -27,14 +38,6 @@ async (c) => {
         }
     )
 
-    .get(
-        '/:id',
-        async (c) => {
-            const { id } = c.req.param()
-            const result = await deviceController.getDevice(id)
-            return c.json(result, 200)
-        }
-    )
 
     .get(
         '/:id/platforms',
