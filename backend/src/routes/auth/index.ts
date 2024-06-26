@@ -44,13 +44,9 @@ export default new Hono()
             return c.text('Password is not correct', 401)
         }
 
-        const accessToken = await sign({ ...restUser, exp:  Math.floor(Date.now() / 1000) + 60 * 5 }, process.env.SECRET ?? '')
-        const refreshToken = await sign({ id: restUser.id, refresh: true, maxAge: '7d' }, process.env.SECRET ?? '')
+        const accessToken = await sign({ ...restUser, exp:  Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30 }, process.env.SECRET ?? '')
 
-        return c.json({
-            accessToken,
-            refreshToken
-        })
+        return c.json({accessToken})
     })
 
 
