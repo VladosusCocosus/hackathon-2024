@@ -1,4 +1,5 @@
 import {db} from "../../lib/db";
+import { CircleCI } from "../../lib/platforms/circle-ci";
 import {Device} from "../../types/device";
 import {Platform} from "../../types/platforms";
 
@@ -32,5 +33,16 @@ export class PlatformController {
         const newPlatform = rows[0]
 
         return newPlatform ?? null
+    }
+
+    async refreshProjects (userId: string) {
+        
+        let x = new CircleCI
+
+        let response = await x.refreshProjects('123', userId)
+
+        console.log(response)
+
+        return response
     }
 }

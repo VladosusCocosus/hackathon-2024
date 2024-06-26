@@ -3,6 +3,7 @@ import {zValidator} from "@hono/zod-validator";
 import { PlatformController} from "./controller";
 import {platformSchema} from "../../types/platforms";
 import {z} from "zod";
+import { db } from "../../lib/db";
 
 const platformController = new PlatformController()
 
@@ -34,10 +35,52 @@ export default new Hono()
     )
 
     .get(
-        '/:id',
+        '/project',
         async (c) => {
-            const { id } = c.req.param()
-            const result = await platformController.getPlatform(id)
+            const {id: userId} = c.get('jwtPayload')
+            const result = await platformController.refreshProjects(userId)
             return c.json(result, 200)
+        }
+    )
+
+    .get(
+        '/:platfromId',
+        async (c) => {
+            const { platfromId } = c.req.param()
+            const result = await platformController.getPlatform(platfromId)
+            return c.json(result, 200)
+        }
+    )
+
+
+    // сделать по key вместо id
+    .get(
+        '/:platfromId/all-pipelines',
+        async (c) => {
+            const { platfromId } = c.req.param()
+            const result = await platformController.refreshProjects(platfromId)
+            return c.json(result, 200)
+        }
+    )
+
+    .post(
+        '/:platfromId/:projectId/change-status',
+        zValidator('json', z.object({ active: z.boolean() })),
+        async (c) => {
+            const body = c.req.valid('json')
+            const { projectId } = c.req.param()
+            db.query(`UPDATE projects SET is_active = $1 WHERE id = $2`, [body.active, projectId])
+            return c.json({ ok: true }, 200)
+        }
+    )
+
+    .post(
+        '/:platfromId/:projectId/set-token',
+        zValidator('json', z.any()),
+        async (c) => {
+            const body = c.req.valid('json')
+            const { projectId } = c.req.param()
+            db.query(`UPDATE device_platfroms SET meta = $1 WHERE id = $2`, [JSON.stringify(body), projectId])
+            return c.json({ ok: true }, 200)
         }
     )

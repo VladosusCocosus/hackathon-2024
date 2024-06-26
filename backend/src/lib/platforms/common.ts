@@ -8,6 +8,10 @@ export interface Pipeline {
   info: Workflow,
 }
 
+export interface Projects {
+  projects: string[]
+}
+
 export class PlatformAdapter {
   async getPipeline (access_token?: string, secret_token?: string):Promise<Pipeline[]> {
    throw new Error("Method not implemented")

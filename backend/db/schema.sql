@@ -9,6 +9,13 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+--
+-- Name: public; Type: SCHEMA; Schema: -; Owner: -
+--
+
+-- *not* creating schema, since initdb creates it
+
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -20,7 +27,8 @@ SET default_table_access_method = heap;
 CREATE TABLE public.device_platforms (
     id integer NOT NULL,
     device_id uuid,
-    platform_id integer NOT NULL
+    platform_id integer NOT NULL,
+    meta jsonb
 );
 
 
@@ -107,6 +115,19 @@ ALTER SEQUENCE public.platforms_id_seq OWNED BY public.platforms.id;
 
 
 --
+-- Name: projects; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.projects (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name character varying(64),
+    user_id uuid,
+    device_id uuid,
+    is_active boolean
+);
+
+
+--
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -165,6 +186,14 @@ ALTER TABLE ONLY public.platforms
 
 
 --
+-- Name: projects projects_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: schema_migrations schema_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -202,6 +231,13 @@ CREATE INDEX devices_owner_idx ON public.devices USING btree (owner);
 
 
 --
+-- Name: projects_device_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projects_device_id_idx ON public.projects USING btree (device_id);
+
+
+--
 -- Name: device_platforms device_platforms_device_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -226,6 +262,22 @@ ALTER TABLE ONLY public.devices
 
 
 --
+-- Name: projects projects_device_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_device_id_fkey FOREIGN KEY (device_id) REFERENCES public.devices(id);
+
+
+--
+-- Name: projects projects_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
@@ -236,4 +288,7 @@ ALTER TABLE ONLY public.devices
 
 INSERT INTO public.schema_migrations (version) VALUES
     ('20240613152344'),
-    ('20240619204714');
+    ('20240619204714'),
+    ('20240626141658'),
+    ('20240626142323'),
+    ('20240626144942');
