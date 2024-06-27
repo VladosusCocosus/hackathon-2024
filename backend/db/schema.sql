@@ -9,13 +9,6 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
---
--- Name: public; Type: SCHEMA; Schema: -; Owner: -
---
-
--- *not* creating schema, since initdb creates it
-
-
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -28,7 +21,8 @@ CREATE TABLE public.device_platforms (
     id integer NOT NULL,
     device_id uuid,
     platform_id integer NOT NULL,
-    meta jsonb
+    meta jsonb,
+    user_id uuid
 );
 
 
@@ -224,6 +218,13 @@ CREATE UNIQUE INDEX device_platforms_device_id_platform_id_idx ON public.device_
 
 
 --
+-- Name: device_platforms_user_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX device_platforms_user_id ON public.device_platforms USING btree (platform_id, user_id);
+
+
+--
 -- Name: devices_owner_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -251,6 +252,14 @@ ALTER TABLE ONLY public.device_platforms
 
 ALTER TABLE ONLY public.device_platforms
     ADD CONSTRAINT device_platforms_platform_id_fkey FOREIGN KEY (platform_id) REFERENCES public.platforms(id);
+
+
+--
+-- Name: device_platforms device_platforms_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.device_platforms
+    ADD CONSTRAINT device_platforms_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
@@ -291,4 +300,6 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20240619204714'),
     ('20240626141658'),
     ('20240626142323'),
-    ('20240626144942');
+    ('20240626144942'),
+    ('20240627091549'),
+    ('20240627091703');

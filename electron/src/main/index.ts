@@ -69,24 +69,6 @@ function createWindow(): void {
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.electron')
 
-  session.defaultSession.webRequest.onHeadersReceived(
-    { urls: ['http://localhost:3000/*'] },
-    (details, callback) => {
-      if (
-        details.responseHeaders &&
-        details.responseHeaders['set-cookie'] &&
-        details.responseHeaders['set-cookie'].length &&
-        !details.responseHeaders['set-cookie'][0].includes('SameSite=none')
-      ) {
-        details.responseHeaders['set-cookie'][0] = details.responseHeaders['set-cookie'][0] + '; SameSite=none; Secure';
-      }
-
-      console.log(details.responseHeaders)
-
-      callback({ cancel: false, responseHeaders: details.responseHeaders });
-    },
-  );
-
   session.defaultSession.cookies.get({})
     .then((cookies) => {
       console.log(cookies)

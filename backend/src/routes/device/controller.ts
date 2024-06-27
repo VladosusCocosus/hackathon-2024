@@ -36,7 +36,6 @@ export class DeviceController {
     }
 
     async getUserDevices (userId: string): Promise<Device[]> {
-        console.log({userId})
         const { rows } = await db.query<Device>(`select * from devices where owner = $1`, [userId])
         return rows
     }

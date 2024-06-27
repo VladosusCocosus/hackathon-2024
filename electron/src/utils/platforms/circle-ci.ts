@@ -31,8 +31,6 @@ export class CircleCI extends PlatformAdapter {
       }[]
     }
 
-    console.log(this.token)
-
     try {
       const {data} = await axios.get<PipelineResponse>(URL, {
         params: {

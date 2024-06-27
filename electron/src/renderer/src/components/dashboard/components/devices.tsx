@@ -1,12 +1,11 @@
 import {useQuery} from "@tanstack/react-query";
 import {request} from "../../../lib/request";
-import {Flex, View} from "@adobe/react-spectrum";
+import {View} from "@adobe/react-spectrum";
 import {motion} from "framer-motion";
-import {Link} from "react-router-dom";
 
 function useDevices () {
-  return useQuery<[], unknown, [], ['platforms']>({
-    queryKey: ['platforms'],
+  return useQuery<[], unknown, [], ['devices']>({
+    queryKey: ['devices'],
     async queryFn () {
       const response = await request('/devices/user')
       if (!response.ok) {
