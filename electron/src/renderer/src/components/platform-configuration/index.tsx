@@ -1,45 +1,70 @@
 import {useNavigate, useParams} from "react-router-dom";
 import {Button, Flex, TextField, View} from "@adobe/react-spectrum";
-import {Platform, PlatformNames, platformNames, platformsIcons} from "../../../../types/platforms";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {useStore} from "../../hooks/use-store";
+import {useQuery} from "@tanstack/react-query";
+import {request} from "../../lib/request";
 
 interface State {
   accessToken: string
   secretToken: string
 }
 
+interface Platform {
+  id: string
+  name: string
+  image: string
+}
+
+function usePlatform(id: string) {
+  return useQuery<Platform, unknown, Platform, ['platform', string]>({
+    queryKey: ['platform', id],
+    async queryFn () {
+      const data = await request(`/platforms/${id}`)
+      return data.json()
+    }
+  })
+}
+
+function usePipeline() {
+  return useQuery({
+    queryKey: ['pipelines'],
+    async queryFn () {
+      // TODO: Method
+      const data = await request('///')
+      return data.json()
+    }
+  })
+}
+
+function usePlatfromTokenMutation() {
+
+}
+
+function usePlatfromReposMutation() {
+
+}
+
 export function PlatformConfiguration (): JSX.Element {
   const params = useParams<{ providerName: string }>()
-  const navigate = useNavigate()
-  const [settings, setSettings ] = useStore<Platform[]>('platforms')
 
-  const platform = settings?.find((s) => s.key === params.providerName)
+  const navigate = useNavigate()
+
+  const {data} = usePlatform(params.providerName ?? '')
 
   const [state, setState] = useState<{
-    accessToken: string, secretToken: string
+    accessToken: string,
+    secretToken: string
   }>({
-    accessToken: platform?.accessToken ?? '',
-    secretToken: platform?.secretToken ?? ''
-    })
+    accessToken: '',
+    secretToken: ''
+  })
 
   const providerName = params.providerName
-
-
 
   if (!providerName) {
     throw new Error("Provider Name is undefined")
   }
-
-
-  useEffect(() => {
-    if (platform) {
-      setState({
-        accessToken: platform.accessToken,
-        secretToken: platform.secretToken,
-      })
-    }
-  }, [platform]);
 
   function handleChange(key: keyof State) {
     return (value: string) => {
@@ -51,30 +76,23 @@ export function PlatformConfiguration (): JSX.Element {
     if (!providerName) {
       return
     }
-
-    const newValue: Platform = {
-      name: platformNames[providerName ?? ''],
-      key: providerName as unknown as PlatformNames,
-      accessToken: state.accessToken,
-      secretToken: state.secretToken,
-    }
-
-    const newSettings = [...(settings?.filter((s) => s.key !== providerName) ?? []), newValue]
-
-    setSettings(newSettings)
-
-    navigate('/')
   }
 
 
+
+  if (!data) {
+    return (
+      <View/>
+    )
+  }
 
   return (
     <View paddingX={'size-200'}>
       <Flex gap={'size-100'} alignItems={"center"}>
       <h2>
-        {platformNames[params.providerName]}
+        {data.name}
       </h2>
-        <img src={platformsIcons[params.providerName]} alt={params.providerName} width={30} height={30} style={{ borderRadius: '50%' }}/>
+        <img src={data.image} alt={params.providerName} width={30} height={30} style={{ borderRadius: '50%' }}/>
       </Flex>
 
       <Flex direction={'column'} gap={'size-200'}>

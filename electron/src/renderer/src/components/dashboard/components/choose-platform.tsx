@@ -28,8 +28,6 @@ function usePlatforms () {
 export function ChoosePlatform() {
   const platforms = usePlatforms()
 
-  console.log(platforms.data)
-
   return (
     <View borderWidth={'thick'} borderColor={'gray-400'} backgroundColor={'gray-300'} borderRadius={'regular'} padding={'size-200'}>
       <h3>Choose Platform</h3>
