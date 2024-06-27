@@ -1,7 +1,7 @@
 import {useNavigate, useParams} from "react-router-dom";
 import {Button, Flex, TextField, View} from "@adobe/react-spectrum";
 import {useState} from "react";
-import {useQuery} from "@tanstack/react-query";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {request} from "../../lib/request";
 
 interface State {
@@ -29,15 +29,29 @@ function usePipeline() {
   return useQuery({
     queryKey: ['pipelines'],
     async queryFn () {
-      // TODO: Method
       const data = await request('///')
+      // TODO: Method
       return data.json()
     }
   })
 }
 
-function usePlatfromTokenMutation() {
+function usePlatformTokenMutation(platformId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    async mutationFn (variables: Record<string, unknown>) {
+      console.log(platformId)
+      await request(`/platforms/${platformId}/set-token`, {body: JSON.stringify(variables), method: "PATCH"})
 
+
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['platform'] }),
+        queryClient.invalidateQueries({ queryKey: ['pipelines'] })
+      ])
+
+    }
+  })
 }
 
 function usePlatfromReposMutation() {
@@ -50,6 +64,7 @@ export function PlatformConfiguration (): JSX.Element {
   const navigate = useNavigate()
 
   const {data} = usePlatform(params.providerName ?? '')
+  const platformTokenMutation = usePlatformTokenMutation(params.providerName ?? '')
 
   const [state, setState] = useState<{
     accessToken: string,
@@ -72,9 +87,9 @@ export function PlatformConfiguration (): JSX.Element {
   }
 
   function handlePress() {
-    if (!providerName) {
-      return
-    }
+    console.log("abc 12")
+
+    platformTokenMutation.mutate(state)
   }
 
 
