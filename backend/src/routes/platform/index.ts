@@ -67,20 +67,32 @@ export default new Hono()
         '/:platfromId/:projectId/change-status',
         zValidator('json', z.object({ active: z.boolean() })),
         async (c) => {
+
             const body = c.req.valid('json')
             const { projectId } = c.req.param()
-            db.query(`UPDATE projects SET is_active = $1 WHERE id = $2`, [body.active, projectId])
+            await db.query(`UPDATE projects SET is_active = $1 WHERE id = $2`, [body.active, projectId])
             return c.json({ ok: true }, 200)
         }
     )
 
-    .post(
-        '/:platfromId/:projectId/set-token',
+
+    .patch(
+        '/:platformId/:projectId/set-token',
         zValidator('json', z.any()),
         async (c) => {
+            const {id: userId} = c.get('jwtPayload')
             const body = c.req.valid('json')
-            const { projectId } = c.req.param()
-            db.query(`UPDATE device_platfroms SET meta = $1 WHERE id = $2`, [JSON.stringify(body), projectId])
+            const { platformId } = c.req.param()
+
+
+            await db.query(`
+                INSERT INTO device_platforms (platform_id, meta, user_id) values ($1)
+                    on conflict do update set meta = $1
+                WHERE platform_id = $3 and user_id = $2
+                `, [JSON.stringify(body), userId, platformId]
+            )
+
+
             return c.json({ ok: true }, 200)
         }
     )

@@ -1,7 +1,6 @@
 import {useNavigate, useParams} from "react-router-dom";
 import {Button, Flex, TextField, View} from "@adobe/react-spectrum";
 import {useState} from "react";
-import {useStore} from "../../hooks/use-store";
 import {useQuery} from "@tanstack/react-query";
 import {request} from "../../lib/request";
 
