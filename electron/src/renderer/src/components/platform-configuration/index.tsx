@@ -13,6 +13,7 @@ interface Platform {
   id: string
   name: string
   image: string
+  userData: Record<string, unknown>
 }
 
 function usePlatform(id: string) {
@@ -71,7 +72,8 @@ export function PlatformConfiguration (): JSX.Element {
     secretToken: string
   }>({
     accessToken: '',
-    secretToken: ''
+    secretToken: '',
+    ...(data?.userData ?? {}),
   })
 
   const providerName = params.providerName
@@ -87,8 +89,6 @@ export function PlatformConfiguration (): JSX.Element {
   }
 
   function handlePress() {
-    console.log("abc 12")
-
     platformTokenMutation.mutate(state)
   }
 

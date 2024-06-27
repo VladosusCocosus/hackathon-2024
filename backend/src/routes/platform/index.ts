@@ -44,11 +44,14 @@ export default new Hono()
     )
 
     .get(
-        '/:platfromId',
+        '/:platformId',
         async (c) => {
-            const { platfromId } = c.req.param()
-            const result = await platformController.getPlatform(platfromId)
-            return c.json(result, 200)
+            const { platformId } = c.req.param()
+            const {id: userId} = c.get('jwtPayload')
+            const result = await platformController.getPlatform(platformId)
+            const userDataResult = await db.query('select meta from device_platforms where user_id = $1 and platform_id = $2 limit 1', [userId, platformId])
+            const userData = userDataResult.rows[0].meta
+            return c.json({...result, userData: (userData ?? {})}, 200)
         }
     )
 
