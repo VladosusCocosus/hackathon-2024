@@ -39,9 +39,20 @@ export class PlatformController {
         
         let x = new CircleCI
 
-        let response = await x.refreshProjects('123', userId)
+        let response = await x.refreshProjects(process.env.CIRCLE_CI_TOKEN!, userId)
 
         console.log(response)
+
+        return response
+    }
+
+    async getPipeline (userId: string) {
+        
+        let x = new CircleCI
+
+        let response = await x.getPipeline(process.env.CIRCLE_CI_TOKEN!, userId)
+
+        // console.log(response)
 
         return response
     }

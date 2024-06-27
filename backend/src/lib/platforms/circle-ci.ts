@@ -4,12 +4,9 @@ import { db } from "../db";
 import { Project } from "../../types/projects";
 import format from 'pg-format'
 
-// получить под нужный проект состояние пайплайна
-const URL = 'https://circleci.com/api/v2/pipeline'
-
 
 export class CircleCI extends PlatformAdapter {
-  async getPipeline (token?: string): Promise<Pipeline[]> {
+  async getPipeline (token: string, userId: string): Promise<Pipeline[]> {
     if (!token) {
       return []
     }
@@ -35,6 +32,10 @@ export class CircleCI extends PlatformAdapter {
 
 
     try {
+
+      // получить под нужный проект состояние пайплайна
+      const URL = 'https://circleci.com/api/v2/pipeline'
+
       // здесь мы берем все сущ репы
       // TODO вынести в отдельный метод
       const {data} = await axios.get<PipelineResponse>(URL, {
@@ -44,6 +45,8 @@ export class CircleCI extends PlatformAdapter {
         },
         headers: {"Circle-Token": token}
       })
+
+      // console.log(data)
 
       const filtredItems: PipelineResponse['items'] = []
 
@@ -55,10 +58,13 @@ export class CircleCI extends PlatformAdapter {
         filtredItems.push(data.items[i])
       }
 
+      console.log(filtredItems)
+
       // TODO отфильтровать по тем репам что юзер ранее выбрал
       // отфильтровать последний пайплайн в рамках этого проекта
       // и получить его статус (уже сделано)
       for (const project of filtredItems) {
+        
         const {data} = await axios.get<WorkflowResponse>(`https://circleci.com/api/v2/pipeline/${project.id}/workflow`, {
           params: {
             "org-slug": "bitbucket/caremanagment"
@@ -84,6 +90,7 @@ export class CircleCI extends PlatformAdapter {
   async refreshProjects (token: string, userId: string): Promise<Projects> {
 
     const URL = 'https://circleci.com/api/v1.1/me'
+    // const URL = 'https://circleci.com/api/v2/pipeline'
 
     if (!token) {
       return {

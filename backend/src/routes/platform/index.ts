@@ -44,6 +44,16 @@ export default new Hono()
     )
 
     .get(
+        '/pipeline-status',
+        async (c) => {
+            // const { platfromId } = c.req.param()
+            const {id: userId} = c.get('jwtPayload')
+            const result = await platformController.getPipeline(userId)
+            return c.json(result, 200)
+        }
+    )
+
+    .get(
         '/:platfromId',
         async (c) => {
             const { platfromId } = c.req.param()
@@ -57,6 +67,7 @@ export default new Hono()
     .get(
         '/:platfromId/all-pipelines',
         async (c) => {
+            console.log('/:platfromId/all-pipelines')
             const { platfromId } = c.req.param()
             const result = await platformController.refreshProjects(platfromId)
             return c.json(result, 200)
